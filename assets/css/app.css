@@ -1,0 +1,16 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer base {
+  body,
+  html {
+    @apply w-full h-full;
+  }
+}
+
+@layer components {
+  .invalid-feedback {
+    @apply text-red-600 text-sm block;
+  }
+}
