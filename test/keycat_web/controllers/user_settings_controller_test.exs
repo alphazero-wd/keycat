@@ -27,15 +27,15 @@ defmodule KeycatWeb.UserSettingsControllerTest do
           "action" => "update_password",
           "current_password" => valid_user_password(),
           "user" => %{
-            "password" => "new valid password",
-            "password_confirmation" => "new valid password"
+            "password" => "helloWorld123!",
+            "password_confirmation" => "helloWorld123!"
           }
         })
 
       assert redirected_to(new_password_conn) == Routes.user_settings_path(conn, :edit)
       assert get_session(new_password_conn, :user_token) != get_session(conn, :user_token)
       assert get_flash(new_password_conn, :info) =~ "Password updated successfully"
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_email_and_password(user.email, "helloWorld123!")
     end
 
     test "does not update password on invalid data", %{conn: conn} do
@@ -44,14 +44,14 @@ defmodule KeycatWeb.UserSettingsControllerTest do
           "action" => "update_password",
           "current_password" => "invalid",
           "user" => %{
-            "password" => "too short",
+            "password" => "short",
             "password_confirmation" => "does not match"
           }
         })
 
       response = html_response(old_password_conn, 200)
       assert response =~ "<h1>Settings</h1>"
-      assert response =~ "should be at least 12 character(s)"
+      assert response =~ "should be at least 6 character(s)"
       assert response =~ "does not match password"
       assert response =~ "is not valid"
 
@@ -84,7 +84,7 @@ defmodule KeycatWeb.UserSettingsControllerTest do
 
       response = html_response(conn, 200)
       assert response =~ "<h1>Settings</h1>"
-      assert response =~ "must have the @ sign and no spaces"
+      assert response =~ "invalid email"
       assert response =~ "is not valid"
     end
   end

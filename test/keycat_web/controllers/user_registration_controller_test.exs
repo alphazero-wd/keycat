@@ -7,9 +7,8 @@ defmodule KeycatWeb.UserRegistrationControllerTest do
     test "renders registration page", %{conn: conn} do
       conn = get(conn, Routes.user_registration_path(conn, :new))
       response = html_response(conn, 200)
-      assert response =~ "<h1>Register</h1>"
-      assert response =~ "Log in</a>"
-      assert response =~ "Register</a>"
+      assert response =~ "Create an account"
+      assert response =~ "Login here"
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -21,11 +20,12 @@ defmodule KeycatWeb.UserRegistrationControllerTest do
   describe "POST /users/register" do
     @tag :capture_log
     test "creates account and logs the user in", %{conn: conn} do
+      username = unique_user_username()
       email = unique_user_email()
 
       conn =
         post(conn, Routes.user_registration_path(conn, :create), %{
-          "user" => valid_user_attributes(email: email)
+          "user" => valid_user_attributes(username: username, email: email)
         })
 
       assert get_session(conn, :user_token)
@@ -35,20 +35,23 @@ defmodule KeycatWeb.UserRegistrationControllerTest do
       conn = get(conn, "/")
       response = html_response(conn, 200)
       assert response =~ email
-      assert response =~ "Settings</a>"
-      assert response =~ "Log out</a>"
+      assert response =~ username
+      assert response =~ "Settings"
+      assert response =~ "Sign out"
     end
 
     test "render errors for invalid data", %{conn: conn} do
       conn =
         post(conn, Routes.user_registration_path(conn, :create), %{
-          "user" => %{"email" => "with spaces", "password" => "too short"}
+          "user" => %{"username" => "john", "email" => "with spaces", "password" => "short"}
         })
 
       response = html_response(conn, 200)
-      assert response =~ "<h1>Register</h1>"
-      assert response =~ "must have the @ sign and no spaces"
-      assert response =~ "should be at least 12 character"
+      assert response =~ "Create an account"
+      assert response =~ "invalid email"
+      assert response =~ "should be at least 6 character(s)"
+      assert response =~ "at least one upper case character"
+      assert response =~ "at least one digit or punctuation character"
     end
   end
 end

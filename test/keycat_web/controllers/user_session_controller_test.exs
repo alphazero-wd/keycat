@@ -11,9 +11,9 @@ defmodule KeycatWeb.UserSessionControllerTest do
     test "renders log in page", %{conn: conn} do
       conn = get(conn, Routes.user_session_path(conn, :new))
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
-      assert response =~ "Register</a>"
-      assert response =~ "Forgot your password?</a>"
+      assert response =~ "Log in to your account"
+      assert response =~ "Create here"
+      assert response =~ "Forgot password?"
     end
 
     test "redirects if already logged in", %{conn: conn, user: user} do
@@ -36,14 +36,15 @@ defmodule KeycatWeb.UserSessionControllerTest do
       conn = get(conn, "/")
       response = html_response(conn, 200)
       assert response =~ user.email
-      assert response =~ "Settings</a>"
-      assert response =~ "Log out</a>"
+      assert response =~ "Settings"
+      assert response =~ "Sign out"
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
           "user" => %{
+            "username" => user.username,
             "email" => user.email,
             "password" => valid_user_password(),
             "remember_me" => "true"
@@ -75,7 +76,7 @@ defmodule KeycatWeb.UserSessionControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
+      assert response =~ "Log in to your account"
       assert response =~ "Invalid email or password"
     end
   end

@@ -20,7 +20,7 @@ defmodule KeycatWeb.Router do
   scope "/", KeycatWeb do
     pipe_through :browser
 
-    get "/", RoomController, :index
+    get "/", PageController, :index
   end
 
   # Other scopes may use custom stacks.
@@ -70,7 +70,6 @@ defmodule KeycatWeb.Router do
     post "/users/reset_password", UserResetPasswordController, :create
     get "/users/reset_password/:token", UserResetPasswordController, :edit
     put "/users/reset_password/:token", UserResetPasswordController, :update
-    resources "/rooms", RoomController, except: [:index]
   end
 
   scope "/", KeycatWeb do
