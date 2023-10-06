@@ -19,8 +19,6 @@ defmodule KeycatWeb.Router do
 
   scope "/", KeycatWeb do
     pipe_through :browser
-
-    get "/", PageController, :index
   end
 
   # Other scopes may use custom stacks.
@@ -78,6 +76,11 @@ defmodule KeycatWeb.Router do
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+
+    get "/", GameController, :index
+    post "/join_game", GameController, :join_game
+    get "/games/:id", GameController, :show
+    delete "/leave_game/:id", GameController, :leave_game
   end
 
   scope "/", KeycatWeb do

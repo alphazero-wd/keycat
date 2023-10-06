@@ -50,6 +50,7 @@ defmodule Keycat.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+      {:httpoison, "~> 2.0"},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev}
     ]
   end
