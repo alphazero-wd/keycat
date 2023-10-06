@@ -15,18 +15,23 @@ defmodule Keycat.Games do
   end
 
   def leave_game(user, game) do
-    if game.status == "lobby" do
-      remove_user_from_game(user, game)
-      :ok
-    else
-      {:warn, "Please reconnect again or you'll be penalized."}
+    case game.status do
+      "lobby" ->
+        remove_user_from_game(user, game)
+        :ok
+
+      "playing" ->
+        {:warn, "Please reconnect again or you'll be penalized."}
+
+      "played" ->
+        :ok
     end
   end
 
   def find_afk_game(user) do
     UsersGames
     |> join(:inner, [ug], g in Game, on: ug.game_id == g.id)
-    |> where([ug], ug.user_id == ^user.id and is_nil(ug.time_taken))
+    |> where([ug, g], ug.user_id == ^user.id and is_nil(ug.time_taken))
     |> select([_ug, g], g)
     |> Repo.one()
   end

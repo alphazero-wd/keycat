@@ -21,9 +21,11 @@ defmodule Keycat.GamesFixtures do
     game
   end
 
-  def add_user_to_game(user, game) do
+  def add_user_to_game(user, game, attrs \\ %{}) do
+    merge_attrs = Enum.into(attrs, %{game_id: game.id, user_id: user.id})
+
     %UsersGames{}
-    |> UsersGames.changeset(%{game_id: game.id, user_id: user.id})
+    |> UsersGames.changeset(merge_attrs)
     |> Repo.insert()
   end
 end

@@ -8,11 +8,12 @@ defmodule Keycat.Games.UsersGames do
     belongs_to :game, Keycat.Games.Game, primary_key: true
     field :wpm, :integer
     field :acc, :float
+    field :time_taken, :integer
   end
 
   def changeset(users_games, attrs \\ %{}) do
     users_games
-    |> cast(attrs, [:wpm, :acc, :user_id, :game_id])
+    |> cast(attrs, [:wpm, :acc, :time_taken, :user_id, :game_id])
     |> validate_required([:user_id, :game_id])
     |> validate_number(:wpm, greater_than: -1)
     |> validate_inclusion(:acc, 0..100)
