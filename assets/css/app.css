@@ -14,3 +14,13 @@
     @apply text-red-600 text-sm block;
   }
 }
+
+@layer utilities {
+  .correct {
+    @apply bg-green-100;
+  }
+
+  .incorrect {
+    @apply bg-red-100;
+  }
+}
