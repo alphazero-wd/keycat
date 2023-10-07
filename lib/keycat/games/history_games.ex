@@ -1,9 +1,9 @@
-defmodule Keycat.Games.UsersGames do
+defmodule Keycat.Games.HistoryGames do
   use Ecto.Schema
   import Ecto.Changeset
 
   @primary_key false
-  schema "users_games" do
+  schema "history_games" do
     belongs_to :user, Keycat.Accounts.User, primary_key: true
     belongs_to :game, Keycat.Games.Game, primary_key: true
     field :wpm, :integer
@@ -11,8 +11,8 @@ defmodule Keycat.Games.UsersGames do
     field :time_taken, :integer
   end
 
-  def changeset(users_games, attrs \\ %{}) do
-    users_games
+  def changeset(history_games, attrs \\ %{}) do
+    history_games
     |> cast(attrs, [:wpm, :acc, :time_taken, :user_id, :game_id])
     |> validate_required([:user_id, :game_id])
     |> validate_number(:wpm, greater_than: -1)

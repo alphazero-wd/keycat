@@ -8,7 +8,7 @@ defmodule Keycat.Games.Game do
     field :status, :string
     field :paragraph, :string
     field :time_limit, :integer
-    many_to_many :users, Keycat.Accounts.User, join_through: "users_games"
+    many_to_many :users, Keycat.Accounts.User, join_through: "history_games"
 
     timestamps()
   end

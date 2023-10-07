@@ -73,6 +73,15 @@ defmodule Keycat.GamesTest do
       refute Games.find_afk_game(user)
     end
 
+    test "should remove the user from the game if it has finished", %{user: user} do
+      game = game_fixture(%{status: "played"})
+      add_user_to_game(user, game)
+      assert Games.find_afk_game(user)
+      result = Games.leave_game(user, game)
+      assert :ok = result
+      assert Games.find_afk_game(user)
+    end
+
     test "should penalize the user if they quit the game halfway", %{user: user} do
       game = game_fixture(%{status: "playing"})
       add_user_to_game(user, game)
@@ -80,6 +89,29 @@ defmodule Keycat.GamesTest do
       result = Games.leave_game(user, game)
       assert {:warn, _message} = result
       assert Games.find_afk_game(user)
+    end
+  end
+
+  describe "get_game_by_id/2" do
+    test "should return nil if the game is not found", %{user: user} do
+      assert_raise(Ecto.NoResultsError, fn -> Games.get_game_by_id(123, user) end)
+    end
+
+    test "should return nil if the game has already finished", %{user: user} do
+      game = game_fixture(%{status: "played"})
+      add_user_to_game(user, game)
+      assert game.id |> Games.get_game_by_id(user) |> is_nil()
+    end
+
+    test "should return nil if the user doesn't join in the game", %{user: user} do
+      game = game_fixture()
+      assert is_nil(Games.get_game_by_id(game.id, user))
+    end
+
+    test "should return the game if the user is AFK", %{user: user} do
+      game = game_fixture()
+      add_user_to_game(user, game)
+      assert Games.get_game_by_id(game.id, user).id == game.id
     end
   end
 end

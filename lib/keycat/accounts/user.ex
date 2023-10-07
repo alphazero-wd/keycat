@@ -8,7 +8,7 @@ defmodule Keycat.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    many_to_many :games, Keycat.Games.Game, join_through: "users_games"
+    many_to_many :games, Keycat.Games.Game, join_through: "history_games"
 
     timestamps()
   end

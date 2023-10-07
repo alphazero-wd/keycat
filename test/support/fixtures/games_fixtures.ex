@@ -1,5 +1,5 @@
 defmodule Keycat.GamesFixtures do
-  alias Keycat.{Repo, Games.Game, Games.UsersGames}
+  alias Keycat.{Repo, Games.Game, Games.HistoryGames}
 
   def valid_game_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
@@ -24,8 +24,8 @@ defmodule Keycat.GamesFixtures do
   def add_user_to_game(user, game, attrs \\ %{}) do
     merge_attrs = Enum.into(attrs, %{game_id: game.id, user_id: user.id})
 
-    %UsersGames{}
-    |> UsersGames.changeset(merge_attrs)
+    %HistoryGames{}
+    |> HistoryGames.changeset(merge_attrs)
     |> Repo.insert()
   end
 end

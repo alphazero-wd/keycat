@@ -1,6 +1,6 @@
 defmodule Keycat.Games do
   import Ecto.Query
-  alias Keycat.{Repo, Games.Game, Games.UsersGames}
+  alias Keycat.{Repo, Games.Game, Games.HistoryGames}
 
   def join_game(user) do
     afk_game = find_afk_game(user)
@@ -29,7 +29,7 @@ defmodule Keycat.Games do
   end
 
   def find_afk_game(user) do
-    UsersGames
+    HistoryGames
     |> join(:inner, [ug], g in Game, on: ug.game_id == g.id)
     |> where([ug, g], ug.user_id == ^user.id and is_nil(ug.time_taken))
     |> select([_ug, g], g)
@@ -39,11 +39,11 @@ defmodule Keycat.Games do
   def get_game_by_id(id, user) do
     game = Repo.get!(Game, id) |> Repo.preload([:users])
     already_in_game? = Enum.any?(game.users, &(user.id == &1.id))
-    if already_in_game?, do: game
+    if already_in_game? and game.status != "played", do: game
   end
 
   defp find_game() do
-    UsersGames
+    HistoryGames
     |> join(:inner, [ug], g in Game, on: ug.game_id == g.id)
     |> where([ug, g], g.status == "lobby")
     |> group_by([_ug, g], g.id)
@@ -56,20 +56,20 @@ defmodule Keycat.Games do
   defp add_user_to_game(game, user) do
     has_joined? =
       Repo.exists?(
-        from ug in UsersGames, where: ug.user_id == ^user.id and ug.game_id == ^game.id
+        from ug in HistoryGames, where: ug.user_id == ^user.id and ug.game_id == ^game.id
       )
 
     if has_joined? do
       {:error, "You've joined in this room"}
     else
-      %UsersGames{}
-      |> UsersGames.changeset(%{game_id: game.id, user_id: user.id})
+      %HistoryGames{}
+      |> HistoryGames.changeset(%{game_id: game.id, user_id: user.id})
       |> Repo.insert()
     end
   end
 
   defp remove_user_from_game(user, game) do
-    query = from ug in UsersGames, where: ug.user_id == ^user.id and ug.game_id == ^game.id
+    query = from ug in HistoryGames, where: ug.user_id == ^user.id and ug.game_id == ^game.id
 
     Repo.delete_all(query)
   end
