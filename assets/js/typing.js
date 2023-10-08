@@ -1,37 +1,55 @@
-const typingParagraphEl = document.getElementById("typing_paragraph");
-const typingBox = document.getElementById("typing_box");
-const instance = new Mark(typingParagraphEl);
+import { specialKeys } from "./special_keys";
+
+const typingParagraphEl = document.getElementById("typing-paragraph");
+const typingBox = document.getElementById("typing-box");
 const typingParagraph = typingParagraphEl.textContent;
 let prevError = null;
 let charTyped = 0;
 
 typingBox.addEventListener("paste", (e) => e.preventDefault()); // prevent cheating
 
-typingBox.addEventListener("input", (e) => {});
-
 typingBox.addEventListener("keydown", (e) => {
+  let highlightedText = "";
   if (e.key === "Backspace") {
     if (prevError === null) e.preventDefault();
     else {
-      instance.unmark({ className: "incorrect" });
       charTyped--;
+      highlightedText =
+        `<mark class="correct">${typingParagraph.substring(
+          0,
+          charTyped
+        )}</mark>` + typingParagraph.substring(charTyped);
+      typingParagraphEl.innerHTML = highlightedText;
       prevError = null;
     }
-  } else if (e.key !== "Shift" && prevError === null) {
+  } else if (!isSpecialKeyPressed(e.key) && prevError === null) {
     let classNameBasedOnCorrectness = "";
 
     if (typingParagraph[charTyped] === e.key) {
       if (e.key === " ") typingBox.value = "";
-      else classNameBasedOnCorrectness = "correct";
+      classNameBasedOnCorrectness = "correct";
     } else {
       prevError = charTyped;
       classNameBasedOnCorrectness = "incorrect";
     }
-    instance.markRanges([{ start: charTyped, length: 1 }], {
-      className: classNameBasedOnCorrectness,
-    });
+
+    highlightedText =
+      `<mark class="correct">${typingParagraph.substring(
+        0,
+        charTyped
+      )}</mark>` +
+      `<mark class="${classNameBasedOnCorrectness}">${typingParagraph.charAt(
+        charTyped
+      )}</mark>` +
+      typingParagraph.substring(charTyped + 1);
+    typingParagraphEl.innerHTML = highlightedText;
     charTyped++;
   } else {
     e.preventDefault();
   }
 });
+
+function isSpecialKeyPressed(key) {
+  const specialKeysSet = new Set(specialKeys);
+  return specialKeysSet.has(key);
+}

@@ -6,14 +6,14 @@
   <div class="space-y-4 mb-6">
     <div class="space-y-4">
         <%= for player <- @game.users do %>
-          <div class="flex justify-between items-center">
+          <div id={"player-#{player.id}"} class="flex justify-between items-center">
             <span class="font-medium text-lg"><%= player.username %></span>
-            <span>0%</span>
+            <span id={"player-#{player.id}-progress"}>0%</span>
           </div>
         <% end %>
     </div>
-    <p id="typing_paragraph"><%= @game.paragraph %></p>
-    <input placeholder="Type when the game begins" id="typing_box" class="bg-gray-50 focus:outline-none border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-violet-600 focus:border-violet-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:ring-2 dark:focus:ring-violet-500 dark:focus:border-violet-500">
+    <p id="typing-paragraph" class="font-sans"><%= @game.paragraph %></p>
+    <input placeholder="Type when the game begins" id="typing-box" class="bg-gray-50 focus:outline-none border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-violet-600 focus:border-violet-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:ring-2 dark:focus:ring-violet-500 dark:focus:border-violet-500">
   </div>
   <%= link "Leave game", to: Routes.game_path(@conn, :leave_game, @game), method: :delete, data: [confirm: "Are you sure you want to leave this game? You may be subject to some punishments which might hurt your scores. Please rethink before leaving."], class: "text-white mt-3 bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:ring-violet-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-violet-600 dark:hover:bg-violet-700 focus:outline-none dark:focus:ring-violet-800" %>
 </div>

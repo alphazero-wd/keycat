@@ -8,7 +8,6 @@
     <%= live_title_tag assigns[:page_title] || "", prefix: "KEYCAT | " %>
     <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}/>
     <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.es6.min.js" integrity="sha512-jZSRKDD86PmExf0ZoXQEMxhtxvLtOxo2xMJwgnx3VE/5VT5c8LCsnvut4wK3fIdFyO4szlbz/2tpg+xulnJDyQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
   <body>
      <%= render "navbar.html", assigns %>
