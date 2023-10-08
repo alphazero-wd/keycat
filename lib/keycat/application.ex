@@ -15,9 +15,10 @@ defmodule Keycat.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Keycat.PubSub},
       # Start the Endpoint (http/https)
-      KeycatWeb.Endpoint
+      KeycatWeb.Endpoint,
       # Start a worker by calling: Keycat.Worker.start_link(arg)
       # {Keycat.Worker, arg}
+      KeycatWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

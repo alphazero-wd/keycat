@@ -1,10 +1,11 @@
+<span class="sr-only" id="join-game" data-id={@game.id}></span>
 <div class="container mx-auto max-w-3xl">
   <h1 class="mb-1 text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
     Game Lobby
   </h1>
-  <p class="font-normal text-gray-700 dark:text-gray-400">Waiting for opponents...</p>
+  <p id="game-status" class="font-normal text-gray-700 dark:text-gray-400" data-status={@game.status}>Waiting for opponents...</p>
   <div class="space-y-4 mb-6">
-    <div class="space-y-4">
+    <div id="players" class="space-y-4">
         <%= for player <- @game.users do %>
           <div id={"player-#{player.id}"} class="flex justify-between items-center">
             <span class="font-medium text-lg"><%= player.username %></span>
