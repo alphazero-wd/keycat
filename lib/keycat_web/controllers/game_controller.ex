@@ -6,9 +6,8 @@ defmodule KeycatWeb.GameController do
     apply(__MODULE__, action_name(conn), [conn, conn.params, conn.assigns.current_user])
   end
 
-  def index(conn, _params, user) do
-    game = Games.find_afk_game(user)
-    render(conn, "index.html", game: game, page_title: "Home")
+  def index(conn, _params, _user) do
+    render(conn, "index.html", page_title: "Home")
   end
 
   def join_game(conn, _params, user) do
@@ -29,9 +28,7 @@ defmodule KeycatWeb.GameController do
   def leave_game(conn, %{"id" => id}, user) do
     game = Games.get_game_by_id(id, user)
 
-    case Games.leave_game(user, game) do
-      :ok -> conn |> put_flash(:info, "Successfully left game") |> redirect(to: "/")
-      {:warn, message} -> conn |> put_flash(:info, message) |> redirect(to: "/")
-    end
+    Games.leave_game(user, game)
+    conn |> put_flash(:info, "Successfully left game") |> redirect(to: "/")
   end
 end

@@ -3,52 +3,36 @@ defmodule Keycat.Games do
   alias Keycat.{Repo, Games.Game, Games.HistoryGames}
 
   def join_game(user) do
-    afk_game = find_afk_game(user)
-
-    if afk_game do
-      afk_game
-    else
-      game = find_game() || create_game()
-      add_user_to_game(game, user)
-      game
-    end
+    game = find_game() || create_game()
+    add_user_to_game(game, user)
+    game
   end
 
-  def leave_game(user, game) do
-    case game.status do
-      "lobby" ->
-        remove_user_from_game(user, game)
-        :ok
+  def leave_game(user, id) do
+    game = Repo.get!(Game, id)
 
-      "playing" ->
-        {:warn, "Please reconnect again or you'll be penalized."}
-
-      "played" ->
-        :ok
+    if game.status in ["lobby", "playing"] do
+      remove_user_from_game(user, game)
     end
-  end
 
-  def find_afk_game(user) do
-    HistoryGames
-    |> join(:inner, [ug], g in Game, on: ug.game_id == g.id)
-    |> where([ug, g], ug.user_id == ^user.id and is_nil(ug.time_taken))
-    |> select([_ug, g], g)
-    |> Repo.one()
+    :ok
   end
 
   def get_game_by_id(id, user) do
-    game = Repo.get!(Game, id) |> Repo.preload([:users])
-    already_in_game? = Enum.any?(game.users, &(user.id == &1.id))
-    if already_in_game? and game.status != "played", do: game
+    HistoryGames
+    |> join(:inner, [hg], g in Game, on: hg.game_id == g.id)
+    |> where([hg, g], hg.user_id == ^user.id and hg.game_id == ^id and g.status == "lobby")
+    |> select([_hg, g], g)
+    |> Repo.one()
   end
 
   defp find_game() do
     HistoryGames
-    |> join(:inner, [ug], g in Game, on: ug.game_id == g.id)
-    |> where([ug, g], g.status == "lobby")
-    |> group_by([_ug, g], g.id)
-    |> having([ug, _g], count(ug.user_id) < 5)
-    |> select([_ug, g], g)
+    |> join(:inner, [hg], g in Game, on: hg.game_id == g.id)
+    |> where([_hg, g], g.status == "lobby")
+    |> group_by([_hg, g], g.id)
+    |> having([hg, _g], count(hg.user_id) < 5)
+    |> select([_hg, g], g)
     |> limit(1)
     |> Repo.one()
   end
@@ -56,7 +40,7 @@ defmodule Keycat.Games do
   defp add_user_to_game(game, user) do
     has_joined? =
       Repo.exists?(
-        from ug in HistoryGames, where: ug.user_id == ^user.id and ug.game_id == ^game.id
+        from hg in HistoryGames, where: hg.user_id == ^user.id and hg.game_id == ^game.id
       )
 
     if has_joined? do
@@ -69,7 +53,7 @@ defmodule Keycat.Games do
   end
 
   defp remove_user_from_game(user, game) do
-    query = from ug in HistoryGames, where: ug.user_id == ^user.id and ug.game_id == ^game.id
+    query = from hg in HistoryGames, where: hg.user_id == ^user.id and hg.game_id == ^game.id
 
     Repo.delete_all(query)
   end
@@ -86,5 +70,13 @@ defmodule Keycat.Games do
       |> Repo.insert()
 
     game
+  end
+
+  def update_game_status(id, status) do
+    game = Repo.get!(Game, id)
+
+    game
+    |> Game.changeset(%{status: status})
+    |> Repo.update()
   end
 end
