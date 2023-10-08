@@ -26,9 +26,7 @@ defmodule KeycatWeb.GameController do
   end
 
   def leave_game(conn, %{"id" => id}, user) do
-    game = Games.get_game_by_id(id, user)
-
-    Games.leave_game(user, game)
+    Games.leave_game(user, id)
     conn |> put_flash(:info, "Successfully left game") |> redirect(to: "/")
   end
 end
