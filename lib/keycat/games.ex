@@ -8,11 +8,11 @@ defmodule Keycat.Games do
     game
   end
 
-  def leave_game(user, id) do
-    game = Repo.get!(Game, id)
+  def leave_game(user_id, game_id) do
+    game = Repo.get!(Game, game_id)
 
     if game.status in ["lobby", "playing"] do
-      remove_user_from_game(user, game)
+      remove_user_from_game(user_id, game.id)
     end
 
     :ok
@@ -52,8 +52,8 @@ defmodule Keycat.Games do
     end
   end
 
-  defp remove_user_from_game(user, game) do
-    query = from hg in HistoryGames, where: hg.user_id == ^user.id and hg.game_id == ^game.id
+  defp remove_user_from_game(user_id, game_id) do
+    query = from hg in HistoryGames, where: hg.user_id == ^user_id and hg.game_id == ^game_id
 
     Repo.delete_all(query)
   end

@@ -41,7 +41,7 @@ defmodule Keycat.GamesTest do
     test "should remove the history game if it hasn't started", %{user: user} do
       game = game_fixture()
       add_user_to_game(user, game)
-      result = Games.leave_game(user, game.id)
+      result = Games.leave_game(user.id, game.id)
       assert :ok = result
 
       refute Repo.exists?(
@@ -52,7 +52,7 @@ defmodule Keycat.GamesTest do
     test "should remove the history game if the user quits halfway", %{user: user} do
       game = game_fixture(%{status: "playing"})
       add_user_to_game(user, game)
-      result = Games.leave_game(user, game.id)
+      result = Games.leave_game(user.id, game.id)
       assert :ok = result
 
       refute Repo.exists?(
@@ -63,7 +63,7 @@ defmodule Keycat.GamesTest do
     test "shouldn't remove the history game if it has finished", %{user: user} do
       game = game_fixture(%{status: "played"})
       add_user_to_game(user, game)
-      result = Games.leave_game(user, game.id)
+      result = Games.leave_game(user.id, game.id)
       assert :ok = result
 
       assert Repo.exists?(

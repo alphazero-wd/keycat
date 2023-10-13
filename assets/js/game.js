@@ -1,5 +1,6 @@
 import { Presence } from "phoenix";
 import { convertSecondsToMinutesSeconds } from "./utils";
+import { Typing } from "./typing";
 import Players from "./players";
 
 export default class Game {
@@ -8,6 +9,7 @@ export default class Game {
     this.gameId = gameId;
     this.channel = this.socket.channel("game:" + this.gameId, {});
     this.status = document.getElementById("game-status");
+    this.typing = new Typing(this.channel);
   }
 
   join() {
@@ -17,8 +19,11 @@ export default class Game {
 
     presence.onSync(() => players.renderOnlineUsers(presence));
     this.socket.connect();
+    this.typing.load();
     this.countdown();
-    this.start();
+    // this.updatePlayerProgress();
+
+    this.startTimer();
     this.channel
       .join()
       .receive("ok", (resp) => {
@@ -29,6 +34,15 @@ export default class Game {
       });
   }
 
+  // updatePlayerProgress() {
+  //   this.channel.on("progress", ({ player_id, progress }) => {
+  //     const progressPlayerEl = document.getElementById(
+  //       `progress-player-${player_id}`
+  //     );
+  //     progressPlayerEl.textContent = `${progress}%`;
+  //   });
+  // }
+
   countdown() {
     this.channel.on("countdown", ({ countdown }) => {
       this.status.setAttribute("data-status", "lobby");
@@ -36,12 +50,26 @@ export default class Game {
     });
   }
 
-  start() {
+  startTimer() {
     this.channel.on("game_timer", ({ time_limit }) => {
+      this.typing.typingBox.disabled = false;
       this.status.setAttribute("data-status", "playing");
-      this.status.textContent = `Time limit: ${convertSecondsToMinutesSeconds(
-        time_limit
-      )}`;
+      const countdown = setInterval(() => {
+        if (time_limit < 0) {
+          this.finishTimer();
+          clearInterval(countdown);
+        } else {
+          this.status.textContent = `Time remaining: ${convertSecondsToMinutesSeconds(
+            time_limit
+          )}`;
+          time_limit--;
+        }
+      }, 1000);
     });
+  }
+
+  finishTimer() {
+    this.status.setAttribute("data-status", "played");
+    this.status.textContent = "Game has finished.";
   }
 }

@@ -8,17 +8,15 @@ defmodule Keycat.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Phoenix.PubSub, name: Keycat.PubSub},
+      KeycatWeb.Presence,
       # Start the Ecto repository
       Keycat.Repo,
       # Start the Telemetry supervisor
       KeycatWeb.Telemetry,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: Keycat.PubSub},
       # Start the Endpoint (http/https)
-      KeycatWeb.Endpoint,
+      KeycatWeb.Endpoint
       # Start a worker by calling: Keycat.Worker.start_link(arg)
-      # {Keycat.Worker, arg}
-      KeycatWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

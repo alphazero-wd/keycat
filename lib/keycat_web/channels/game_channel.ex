@@ -22,7 +22,7 @@ defmodule KeycatWeb.GameChannel do
 
     push(socket, "presence_state", game_players)
 
-    if length(Map.keys(game_players)) > 1 do
+    if length(Map.keys(game_players)) == 2 do
       {:ok, tRef} = :timer.send_interval(1_000, :countdown)
       {:noreply, assign(socket, :tRef, tRef)}
     else
@@ -40,22 +40,41 @@ defmodule KeycatWeb.GameChannel do
     else
       :timer.cancel(socket.assigns[:tRef])
       {:ok, game} = Games.update_game_status(socket.assigns.game_id, "playing")
-      socket = assign(socket, time_limit: game.time_limit)
-      :timer.send_interval(1_000, :game_timer)
+      broadcast(socket, "game_timer", %{time_limit: game.time_limit})
       {:noreply, socket}
     end
   end
 
-  def handle_info(:game_timer, socket) do
-    time_limit = socket.assigns[:time_limit]
+  def handle_in("progress", %{"progress" => progress}, socket) do
+    current_user = socket.assigns.current_user
 
-    if time_limit >= 0 do
-      push(socket, "game_timer", %{time_limit: time_limit - 1})
-      broadcast(socket, "game_timer", %{time_limit: time_limit - 1})
-    else
-      Games.update_game_status(socket.assigns.game_id, "played")
+    Presence.update(socket, current_user.id, %{
+      username: current_user.username,
+      progress: progress
+    })
+
+    broadcast(socket, "progress", %{player_id: current_user.id, progress: progress})
+
+    {:noreply, socket}
+  end
+
+  intercept ["presence_diff"]
+
+  def handle_out(
+        "presence_diff",
+        payload,
+        socket
+      ) do
+    IO.inspect(%{payload: payload})
+
+    if map_size(payload.leaves) == 1 do
+      Games.leave_game(Map.keys(payload.leaves) |> hd(), socket.assigns.game_id)
     end
 
-    {:noreply, assign(socket, :time_limit, time_limit - 1)}
+    game_players = Presence.list(socket)
+
+    push(socket, "presence_state", game_players)
+
+    {:noreply, socket}
   end
 end
