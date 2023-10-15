@@ -17,10 +17,10 @@
 
 @layer utilities {
   .correct {
-    @apply bg-green-100;
+    @apply bg-green-200;
   }
 
   .incorrect {
-    @apply bg-red-100;
+    @apply bg-red-200;
   }
 }

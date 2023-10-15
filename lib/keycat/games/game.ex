@@ -21,6 +21,6 @@ defmodule Keycat.Games.Game do
     |> validate_number(:max_wpm, greater_than: -1)
     |> validate_number(:time_limit, greater_than: -1)
     |> validate_format(:paragraph, ~r/^[^\n\r]*$/)
-    |> validate_inclusion(:status, ~w(lobby playing played))
+    |> validate_inclusion(:status, ~w(lobby play))
   end
 end

@@ -3,7 +3,7 @@ export default class Players {
     this.presence = presence;
   }
 
-  renderOnlineUsers() {
+  renderPlayers() {
     let response = "";
 
     this.presence.list((id, { metas: [first] }) => {

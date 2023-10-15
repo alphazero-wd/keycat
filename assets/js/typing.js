@@ -1,18 +1,22 @@
 import { specialKeys } from "./special_keys";
+import { calculateAccuracy, calculateProgress, calculateWpm } from "./utils";
 
 export class Typing {
   constructor(channel) {
     this.typingParagraphEl = document.getElementById("typing-paragraph");
     this.typingBox = document.getElementById("typing-box");
     this.prevError = null;
+    this.typos = 0;
     this.charTyped = 0;
     this.channel = channel;
     this.typingParagraph = this.typingParagraphEl.textContent;
+    this.is_game_finished = false;
   }
 
   load() {
     this.preventCheating();
     this.onKeydown();
+    this.startedAt = new Date().getTime();
   }
 
   preventCheating() {
@@ -45,15 +49,13 @@ export class Typing {
           if (e.key === " ") {
             this.typingBox.value = "";
             this.channel.push("progress", {
-              progress: (
-                (this.charTyped / this.typingParagraph.length) *
-                100
-              ).toFixed(0),
+              progress: calculateProgress(this.charTyped, this.typingParagraph),
             });
           }
           classNameBasedOnCorrectness = "correct";
         } else {
           this.prevError = this.charTyped;
+          this.typos++;
           classNameBasedOnCorrectness = "incorrect";
         }
 
@@ -68,14 +70,39 @@ export class Typing {
           this.typingParagraph.substring(this.charTyped + 1);
         this.typingParagraphEl.innerHTML = highlightedText;
         this.charTyped++;
+        this.onFinishTyping();
       } else {
         e.preventDefault();
       }
     });
   }
 
+  onFinishTyping() {
+    if (this.charTyped === this.typingParagraph.length) {
+      const timeTaken = Date.now() - this.startedAt;
+      this.saveResult(timeTaken);
+      this.is_game_finished = true;
+      this.onEnd();
+    }
+  }
+
+  onEnd() {
+    this.typingParagraphEl.style.display = "none";
+    this.typingBox.blur();
+    this.typingBox.style.display = "none";
+  }
+
   isSpecialKeyPressed(key) {
     const specialKeysSet = new Set(specialKeys);
     return specialKeysSet.has(key);
+  }
+
+  saveResult(timeTaken) {
+    this.channel.push("player_finished", {
+      time_taken: timeTaken,
+      progress: calculateProgress(this.charTyped, this.typingParagraph),
+      wpm: calculateWpm(this.charTyped, timeTaken),
+      acc: calculateAccuracy(this.typos, this.charTyped),
+    });
   }
 }

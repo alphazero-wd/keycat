@@ -30,7 +30,7 @@ defmodule Keycat.GamesTest do
     end
 
     test "should create a game if all games are not in lobby mode", %{user: user} do
-      game = game_fixture(%{status: "playing"})
+      game = game_fixture(%{status: "play"})
       refute Games.join_game(user) == game.id
       game = game_fixture(%{status: "played"})
       refute Games.join_game(user) == game.id
@@ -50,7 +50,7 @@ defmodule Keycat.GamesTest do
     end
 
     test "should remove the history game if the user quits halfway", %{user: user} do
-      game = game_fixture(%{status: "playing"})
+      game = game_fixture(%{status: "play"})
       add_user_to_game(user, game)
       result = Games.leave_game(user.id, game.id)
       assert :ok = result
@@ -88,8 +88,8 @@ defmodule Keycat.GamesTest do
       assert is_nil(Games.get_game_by_id(game.id, user))
     end
 
-    test "should return nil if the game is in playing status", %{user: user} do
-      game = game_fixture(%{status: "playing"})
+    test "should return nil if the game is in play status", %{user: user} do
+      game = game_fixture(%{status: "play"})
       add_user_to_game(user, game)
       assert is_nil(Games.get_game_by_id(game.id, user))
     end

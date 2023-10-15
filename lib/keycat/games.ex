@@ -11,7 +11,7 @@ defmodule Keycat.Games do
   def leave_game(user_id, game_id) do
     game = Repo.get!(Game, game_id)
 
-    if game.status in ["lobby", "playing"] do
+    if game.status in ["lobby", "play"] do
       remove_user_from_game(user_id, game.id)
     end
 
@@ -53,16 +53,20 @@ defmodule Keycat.Games do
   end
 
   defp remove_user_from_game(user_id, game_id) do
-    query = from hg in HistoryGames, where: hg.user_id == ^user_id and hg.game_id == ^game_id
+    query =
+      from hg in HistoryGames,
+        where: hg.user_id == ^user_id and hg.game_id == ^game_id and is_nil(hg.time_taken)
 
     Repo.delete_all(query)
   end
 
   defp create_game() do
+    # typing_text =
+    #   "Since they are still preserved in the rocks for us to see, they must have been formed quite recently, that is, geologically speaking. What can explain these striations and their common orientation? Did you ever hear about the Great Ice Age or the Pleistocene Epoch? Less than one million years ago, in fact, some 12,000 years ago, an ice sheet many thousands of feet thick rode over Burke Mountain in a southeastward direction. The many boulders frozen to the underside of the ice sheet tended to scratch the rocks over which they rode. The scratches or striations seen in the park rocks were caused by these attached boulders. The ice sheet also plucked and rounded Burke Mountain into the shape it possesses today."
     typing_text =
-      "Since they are still preserved in the rocks for us to see, they must have been formed quite recently, that is, geologically speaking. What can explain these striations and their common orientation? Did you ever hear about the Great Ice Age or the Pleistocene Epoch? Less than one million years ago, in fact, some 12,000 years ago, an ice sheet many thousands of feet thick rode over Burke Mountain in a southeastward direction. The many boulders frozen to the underside of the ice sheet tended to scratch the rocks over which they rode. The scratches or striations seen in the park rocks were caused by these attached boulders. The ice sheet also plucked and rounded Burke Mountain into the shape it possesses today."
+      "Since they are still preserved in the rocks for us to see, they must have been formed quite recently, that is, geologically speaking."
 
-    time_limit = trunc(String.length(typing_text) / 5 / 39) * 60
+    time_limit = trunc(String.length(typing_text) / 5 / 39 * 60)
 
     {:ok, game} =
       %Game{}
@@ -78,5 +82,10 @@ defmodule Keycat.Games do
     game
     |> Game.changeset(%{status: status})
     |> Repo.update()
+  end
+
+  def update_player_game_history(user_id, game_id, attrs) do
+    query = from ug in HistoryGames, where: ug.user_id == ^user_id and ug.game_id == ^game_id
+    Repo.update_all(query, set: attrs)
   end
 end

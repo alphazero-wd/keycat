@@ -9,19 +9,26 @@ export default class Game {
     this.gameId = gameId;
     this.channel = this.socket.channel("game:" + this.gameId, {});
     this.status = document.getElementById("game-status");
-    this.typing = new Typing(this.channel);
+    this.typing = new Typing(this.channel, this.is_game_finished);
+    this.presence = new Presence(this.channel);
   }
 
   join() {
     if (!this.gameId) return;
-    const presence = new Presence(this.channel);
-    const players = new Players(presence);
+    const players = new Players(this.presence);
 
-    presence.onSync(() => players.renderOnlineUsers(presence));
+    this.presence.onSync(() => {
+      players.renderPlayers();
+      const playerEls = document.querySelectorAll('[id^="player-"]');
+      if (
+        playerEls.length === 1 &&
+        this.status.getAttribute("data-status") === "lobby"
+      ) {
+        this.status.textContent = "Waiting for opponents...";
+      }
+    });
     this.socket.connect();
-    this.typing.load();
     this.countdown();
-    // this.updatePlayerProgress();
 
     this.startTimer();
     this.channel
@@ -34,15 +41,6 @@ export default class Game {
       });
   }
 
-  // updatePlayerProgress() {
-  //   this.channel.on("progress", ({ player_id, progress }) => {
-  //     const progressPlayerEl = document.getElementById(
-  //       `progress-player-${player_id}`
-  //     );
-  //     progressPlayerEl.textContent = `${progress}%`;
-  //   });
-  // }
-
   countdown() {
     this.channel.on("countdown", ({ countdown }) => {
       this.status.setAttribute("data-status", "lobby");
@@ -52,11 +50,13 @@ export default class Game {
 
   startTimer() {
     this.channel.on("game_timer", ({ time_limit }) => {
+      this.typing.load();
+      let tempTimeLimit = time_limit;
       this.typing.typingBox.disabled = false;
-      this.status.setAttribute("data-status", "playing");
+      this.status.setAttribute("data-status", "play");
       const countdown = setInterval(() => {
         if (time_limit < 0) {
-          this.finishTimer();
+          this.finishTimer(tempTimeLimit);
           clearInterval(countdown);
         } else {
           this.status.textContent = `Time remaining: ${convertSecondsToMinutesSeconds(
@@ -68,8 +68,17 @@ export default class Game {
     });
   }
 
-  finishTimer() {
+  finishTimer(timeLimit) {
     this.status.setAttribute("data-status", "played");
-    this.status.textContent = "Game has finished.";
+    this.status.textContent = "Game has finished. Showing game history...";
+    // if the player has finished typing before
+    if (!this.typing.is_game_finished) {
+      this.typing.onEnd();
+      this.typing.saveResult(timeLimit * 1000);
+      this.typing.is_game_finished = true;
+    }
+    setTimeout(() => {
+      window.location.replace(`${window.origin}/game/${this.gameId}/history`);
+    }, 3000);
   }
 }
